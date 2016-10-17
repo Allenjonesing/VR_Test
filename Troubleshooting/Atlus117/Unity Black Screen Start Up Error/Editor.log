@@ -1,0 +1,33 @@
+Built from '5.4/release' branch; Version is '5.4.2f1 (94e3a60ee258) revision 9757606'; Using compiler version '160040219'
+OS: 'Windows 10  (10.0.0) 64bit' Language: 'en' Physical Memory: 8192 MB
+BatchMode: 0, IsHumanControllingUs: 1, StartBugReporterOnCrash: 1, Is64bit: 1, IsPro: 0
+Initialize mono
+Mono path[0] = 'C:/Program Files/Unity/Editor/Data/Managed'
+Mono path[1] = 'C:/Program Files/Unity/Editor/Data/Mono/lib/mono/2.0'
+Mono path[2] = 'C:/Program Files/Unity/Editor/Data/UnityScript'
+Mono config path = 'C:/Program Files/Unity/Editor/Data/Mono/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,defer=y,address=0.0.0.0:56840
+ListPackages failed, output: module.js:338
+    throw err;
+          ^
+Error: Cannot find module 'C:\Program'
+    at Function.Module._resolveFilename (module.js:336:15)
+    at Function.Module._load (module.js:278:25)
+    at Function.Module.runMain (module.js:501:10)
+    at startup (node.js:129:16)
+    at node.js:814:3
+
+InstallEditorPackages failed, output: module.js:338
+    throw err;
+          ^
+Error: Cannot find module 'C:\Program'
+    at Function.Module._resolveFilename (module.js:336:15)
+    at Function.Module._load (module.js:278:25)
+    at Function.Module.runMain (module.js:501:10)
+    at startup (node.js:129:16)
+    at node.js:814:3
+
+installJavascriptPackages failed
+ 
+(Filename: C:/buildslave/unity/build/Runtime/Utilities/Argv.cpp Line: 171)
+
