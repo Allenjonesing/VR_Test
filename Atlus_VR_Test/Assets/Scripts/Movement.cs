@@ -45,6 +45,23 @@ public class Movement : MonoBehaviour
     [Tooltip("This is the fixed y-coordinate.")]
     public float yOffset;
 
+    [Tooltip("when true, the camera follows the height of the terrain")]
+    public bool standOnGround;
+
+    [Tooltip("The tallest peak in the terrain")]
+    public float highestPointOfTerrain;
+
+    [Tooltip("How tall the player is in unity units")]
+    public float heightToAdd;
+
+    [Tooltip("Additional height for saftey")]
+    public float safeHeight;
+
+    [Tooltip("Checks for walls")]
+    public bool collideWithThings;
+
+    [Tooltip("how far to come to a wall before stopping")]
+    public float maxDistanceToWall;
     void Start()
     {
         head = GetComponentInChildren<StereoController>().Head;
@@ -93,6 +110,42 @@ public class Movement : MonoBehaviour
             isWalking = false;
         }
 
+        if (standOnGround)
+        {
+            RaycastHit hit;
+            //var hit = Physics.Raycast;
+            if (Physics.Raycast(transform.position, -Vector3.up, out hit))
+            {
+                var distancetoground = hit.distance;
+                if (distancetoground > heightToAdd)
+                {
+                    //var heightToAdd = transform.localScale.y;
+                    transform.position = new Vector3(transform.position.x, (transform.position.y - distancetoground + heightToAdd + safeHeight), transform.position.z);
+                }
+                else if (distancetoground < heightToAdd * 0.8)
+                {
+                    isWalking = false;
+                    transform.position = new Vector3(transform.position.x, (transform.position.y + (heightToAdd - distancetoground) + safeHeight), transform.position.z);
+                }
+                else if (distancetoground < heightToAdd)
+                {
+
+                    transform.position = new Vector3(transform.position.x, (transform.position.y + (heightToAdd - distancetoground) + safeHeight), transform.position.z);
+                }
+            }
+        }
+
+
+        if (collideWithThings)
+        {
+            RaycastHit hit;
+            //var hit = Physics.Raycast;
+            if (Physics.Raycast(transform.position, new Vector3(head.transform.forward.x, 0, head.transform.forward.z).normalized, out hit, maxDistanceToWall))
+            {
+                isWalking = false;
+            }
+        }
+
         if (isWalking)
         {
             Vector3 direction = new Vector3(head.transform.forward.x, 0, head.transform.forward.z).normalized * speed * Time.deltaTime;
@@ -104,5 +157,8 @@ public class Movement : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, yOffset, transform.position.z);
         }
+
+        
+
     }
 }
