@@ -82,7 +82,7 @@ public class Movement : MonoBehaviour
 
         // Walk when player looks below the threshold angle 
         if (walkWhenLookDown && !walkWhenTriggered && !isWalking &&
-            head.transform.eulerAngles.x >= thresholdAngle &&
+            head.transform.eulerAngles.x  >= thresholdAngle &&
             head.transform.eulerAngles.x <= RIGHT_ANGLE)
         {
             isWalking = true;

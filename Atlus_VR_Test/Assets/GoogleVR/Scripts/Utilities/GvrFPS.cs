@@ -17,7 +17,7 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(Text))]
 public class GvrFPS : MonoBehaviour {
-  private const string DISPLAY_TEXT_FORMAT = "{0} msf\n({1} FPS)";
+  private const string DISPLAY_TEXT_FORMAT = "{0} msf\n({1} FPS) Test";
   private const string MSF_FORMAT = "#.#";
   private const float MS_PER_SEC = 1000f;
 

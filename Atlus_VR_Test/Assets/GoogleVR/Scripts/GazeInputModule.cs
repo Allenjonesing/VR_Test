@@ -65,8 +65,18 @@ public class GazeInputModule : BaseInputModule {
   /// Allows time for the UI elements to make their state transitions.
   private const float clickTime = 0.1f;  // Based on default time for a button to animate to Pressed.
 
-  /// @cond
-  public override bool ShouldActivateModule() {
+    public JvrInteractiveObject JvrInteractiveObjectScript { get; private set; }
+
+    public GameObject _moveHereObj;
+
+    private Ray ray;
+    private Vector3 gazeHitPosition;
+
+    // private Transform _moveHereComp;
+
+
+    /// @cond
+    public override bool ShouldActivateModule() {
 
     bool isVrModeEnabled = !vrModeOnly;
 #if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
@@ -80,8 +90,12 @@ public class GazeInputModule : BaseInputModule {
     if (activeState != isActive) {
       isActive = activeState;
 
-      // Activate gaze pointer
-      if (gazePointer != null) {
+           // _moveHereComp = _moveHereObj.GetComponent<Transform>();
+            //Instantiate(_moveHereObj, new Vector3(0, 0, 0), Quaternion.identity);
+            //Debug.Assert(_moveHereObj != null, "Moverhereobject is null");
+
+            // Activate gaze pointer
+            if (gazePointer != null) {
         if (isActive) {
           gazePointer.OnGazeEnabled();
         }
@@ -91,8 +105,9 @@ public class GazeInputModule : BaseInputModule {
     return activeState;
   }
   /// @endcond
+ 
 
-  public override void DeactivateModule() {
+    public override void DeactivateModule() {
     DisableGazePointer();
     base.DeactivateModule();
     if (pointerData != null) {
@@ -107,6 +122,95 @@ public class GazeInputModule : BaseInputModule {
     return pointerData != null && pointerData.pointerEnter != null;
   }
 
+    public override void Process()
+    {
+        // Save the previous Game Object
+        GameObject gazeObjectPrevious = GetCurrentGameObject();
+
+        CastRayFromGaze();
+
+        // Send enter events and update the highlight.
+
+       // GameObject _moveHereObj;
+
+        // Check if there is a gameObject at gaze (with an eventTrigger)
+        GameObject gameobjectAtGaze = pointerData.pointerCurrentRaycast.gameObject;
+        
+        if (gameobjectAtGaze)
+        {
+            if (gameobjectAtGaze.tag == "WalkZone")
+            {
+                /* RaycastHit floorHit;
+                 ray.direction = transform.forward;
+                 ray.origin = transform.position;
+                 Physics.Raycast(ray, out floorHit, 10);*/
+                //Instantiate(_moveHereObj, new Vector3(0, 0, 0), Quaternion.identity);
+
+
+                _moveHereObj.transform.position = new Vector3(gazeHitPosition.x, gazeHitPosition.y+.5f, gazeHitPosition.z);
+
+
+            }
+            // Check if it has an JvrInteractiveObject script
+            JvrInteractiveObjectScript = gameobjectAtGaze.GetComponent<JvrInteractiveObject>();
+            // Object has JvrInteractiveObject script, and is within 'interaction' distance
+            if (JvrInteractiveObjectScript)
+            {
+                // Check distance on object
+                if (Vector3.Distance(gameobjectAtGaze.transform.position, Camera.main.transform.position) <= JvrInteractiveObjectScript.distance)
+                {
+                    // Process Normally
+                    UpdateCurrentObject();
+                    UpdateReticle(gazeObjectPrevious);
+                }
+                // Else there is an object, it has JvrInteractiveObject script, but it is outside of distance.
+                else {
+                    // Pointer has exited
+                    HandlePointerExitAndEnter(pointerData, null);
+                    // Reset pointer data (pointerData.reset does not work)
+                    pointerData = new PointerEventData(eventSystem);
+                    // Update the Reticle
+                    UpdateReticle(gazeObjectPrevious);
+                }
+            }
+            // No JvrInteractiveObject Script
+            else {
+                // Process Normally
+                UpdateCurrentObject();
+                UpdateReticle(gazeObjectPrevious);
+            }
+            // Null, no gameobject (looking into a Skybox)
+        }
+        else {
+            // Process Normally
+            UpdateCurrentObject();
+            UpdateReticle(gazeObjectPrevious);
+        }
+
+        // Handle input
+        if (!Input.GetMouseButtonDown(0) && Input.GetMouseButton(0))
+        {
+            HandleDrag();
+        }
+        else if (Time.unscaledTime - pointerData.clickTime < clickTime)
+        {
+            // Delay new events until clickTime has passed.
+        }
+        else if (!pointerData.eligibleForClick &&
+                 (GvrViewer.Instance.Triggered || Input.GetMouseButtonDown(0)))
+        {
+            // New trigger action.
+            HandleTrigger();
+        }
+        else if (!GvrViewer.Instance.Triggered && !Input.GetMouseButton(0))
+        {
+            // Check if there is a pending click to handle.
+            HandlePendingClick();
+        }
+    }
+    /// @endcond
+    /// 
+    /*
   public override void Process() {
     // Save the previous Game Object
     GameObject gazeObjectPrevious = GetCurrentGameObject();
@@ -138,8 +242,9 @@ public class GazeInputModule : BaseInputModule {
     }
   }
   /// @endcond
+  */
 
-  private void CastRayFromGaze() {
+    private void CastRayFromGaze() {
     Quaternion headOrientation;
 #if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     headOrientation = InputTracking.GetLocalRotation(VRNode.Head);
@@ -158,10 +263,14 @@ public class GazeInputModule : BaseInputModule {
     pointerData.Reset();
     pointerData.position = GetGazePointerPosition();
     eventSystem.RaycastAll(pointerData, m_RaycastResultCache);
+            
     pointerData.pointerCurrentRaycast = FindFirstRaycast(m_RaycastResultCache);
     m_RaycastResultCache.Clear();
+
     pointerData.delta = headPose - lastHeadPose;
     lastHeadPose = headPose;
+
+        gazeHitPosition = pointerData.pointerCurrentRaycast.worldPosition;
   }
 
   private void UpdateCurrentObject() {
